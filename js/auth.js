@@ -1,14 +1,16 @@
-// auth.js - autenticación y control de sesión
+// auth.js - controla el login y protege las páginas
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function() {
   verificarPenalizaciones();
 
   const sesion = getSesion();
 
   configurarNavbar(sesion);
 
-  if (document.getElementById("btnLogin")) {
-    iniciarPaginaLogin(sesion);
+  // comprueba si estamos en la página de login mirando si existe el botón de entrar
+  const btnLogin = document.getElementById("btnLogin");
+  if (btnLogin) {
+    manejarLogin(sesion);
   } else {
     protegerPagina(sesion);
   }
@@ -18,49 +20,69 @@ document.addEventListener("DOMContentLoaded", () => {
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
 function configurarNavbar(sesion) {
-  const navUser  = document.getElementById("navUser");
-  const navAdmin = document.getElementById("navAdmin");
+  const navUser   = document.getElementById("navUser");
+  const navAdmin  = document.getElementById("navAdmin");
   const btnLogout = document.getElementById("btnLogout");
 
-  if (navUser && sesion)    navUser.textContent = sesion.nombre;
-  if (navAdmin && sesion?.rol === "admin") navAdmin.classList.remove("hidden");
-  if (btnLogout)            btnLogout.addEventListener("click", cerrarSesion);
+  // muestra el nombre del usuario en la barra de navegación
+  if (navUser && sesion) {
+    navUser.textContent = sesion.nombre;
+  }
+
+  // muestra el enlace de admin solo si el usuario tiene rol admin
+  if (navAdmin && sesion && sesion.rol === "admin") {
+    navAdmin.classList.remove("hidden");
+  }
+
+  // engancha el botón de salir
+  if (btnLogout) {
+    btnLogout.addEventListener("click", cerrarSesion);
+  }
 }
 
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
-function iniciarPaginaLogin(sesion) {
-  // si ya tiene sesión no necesita estar aquí
+function manejarLogin(sesion) {
+  // si ya tiene sesión activa no necesita estar en el login
   if (sesion) {
     window.location.href = "catalogo.html";
     return;
   }
 
-  const btnLogin  = document.getElementById("btnLogin");
-  const errorDiv  = document.getElementById("loginError");
+  const errorDiv = document.getElementById("loginError");
 
-  btnLogin.addEventListener("click", () => intentarLogin(errorDiv));
+  document.getElementById("btnLogin").addEventListener("click", function() {
+    intentarLogin(errorDiv);
+  });
 
-  // también funciona pulsando Enter desde el campo de contraseña
-  document.getElementById("password").addEventListener("keydown", e => {
+  // permite hacer login pulsando Enter en el campo de contraseña
+  document.getElementById("password").addEventListener("keydown", function(e) {
     if (e.key === "Enter") intentarLogin(errorDiv);
   });
 }
 
 function intentarLogin(errorDiv) {
-  const nombre = document.getElementById("usuario").value.trim();
-  const pass   = document.getElementById("password").value.trim();
+  const nombre  = document.getElementById("usuario").value.trim();
+  const pass    = document.getElementById("password").value.trim();
+  const usuarios = getUsuarios();
 
-  const usuario = getUsuarios().find(u => u.nombre === nombre && u.password === pass);
+  // busca un usuario que tenga ese nombre y esa contraseña
+  let usuarioEncontrado = null;
+  for (let i = 0; i < usuarios.length; i++) {
+    if (usuarios[i].nombre === nombre && usuarios[i].password === pass) {
+      usuarioEncontrado = usuarios[i];
+      break;
+    }
+  }
 
-  if (!usuario) {
+  if (!usuarioEncontrado) {
     errorDiv.textContent = "Usuario o contraseña incorrectos.";
     errorDiv.classList.remove("hidden");
     return;
   }
 
-  setSesion(usuario);
+  setSesion(usuarioEncontrado);
   window.location.href = "catalogo.html";
 }
 
@@ -68,15 +90,15 @@ function intentarLogin(errorDiv) {
 // ─── Protección de páginas ────────────────────────────────────────────────────
 
 function protegerPagina(sesion) {
+  // si no hay sesión manda al login
   if (!sesion) {
     window.location.href = "login.html";
     return;
   }
 
-  const esAdmin = sesion.rol === "admin";
-  const enAdmin = window.location.pathname.includes("admin.html");
-
-  if (enAdmin && !esAdmin) {
+  // si un usuario normal intenta entrar al panel de admin, lo manda al catálogo
+  const enPaginaAdmin = window.location.pathname.includes("admin.html");
+  if (enPaginaAdmin && sesion.rol !== "admin") {
     window.location.href = "catalogo.html";
   }
 }

@@ -1,15 +1,15 @@
-// admin.js - Panel de administración
+// admin.js - panel de administración
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function() {
   cargarConfig();
-  renderEstadisticas();
-  renderTablaLibros();
-  renderTablaUsuarios();
-  renderTablaPrestamos();
+  mostrarEstadisticas();
+  mostrarTablaLibros();
+  mostrarTablaUsuarios();
+  mostrarTablaPrestamos();
 
   document.getElementById("btnGuardarConfig").addEventListener("click", guardarConfig);
-  document.getElementById("btnAddLibro").addEventListener("click", agregarLibro);
-  document.getElementById("btnAddUsuario").addEventListener("click", agregarUsuario);
+  document.getElementById("btnAddLibro").addEventListener("click",    agregarLibro);
+  document.getElementById("btnAddUsuario").addEventListener("click",  agregarUsuario);
 });
 
 
@@ -18,19 +18,20 @@ document.addEventListener("DOMContentLoaded", () => {
 function cargarConfig() {
   const cfg = getConfig();
   document.getElementById("cfgMaxLibros").value = cfg.maxLibros;
-  document.getElementById("cfgMaxDias").value = cfg.maxDias;
+  document.getElementById("cfgMaxDias").value   = cfg.maxDias;
 }
 
 function guardarConfig() {
   const maxLibros = parseInt(document.getElementById("cfgMaxLibros").value);
   const maxDias   = parseInt(document.getElementById("cfgMaxDias").value);
 
+  // parseInt devuelve NaN si el campo está vacío o tiene letras
   if (isNaN(maxLibros) || isNaN(maxDias) || maxLibros < 1 || maxDias < 1) {
     alert("Los valores de configuración no son válidos.");
     return;
   }
 
-  setConfig({ maxLibros, maxDias });
+  setConfig({ maxLibros: maxLibros, maxDias: maxDias });
   alert("Configuración guardada.");
 }
 
@@ -48,54 +49,71 @@ function agregarLibro() {
   }
 
   const libros = getLibros();
-  libros.push({ id: nextId(libros), titulo, autor, genero, disponible: true });
+  libros.push({ id: siguienteId(libros), titulo: titulo, autor: autor, genero: genero, disponible: true });
   setLibros(libros);
 
   document.getElementById("nuevoTitulo").value = "";
   document.getElementById("nuevoAutor").value  = "";
   document.getElementById("nuevoGenero").value = "";
 
-  renderTablaLibros();
-  renderEstadisticas();
+  mostrarTablaLibros();
+  mostrarEstadisticas();
 }
 
-window.eliminarLibro = function(id) {
+function eliminarLibro(id) {
   if (!confirm("¿Seguro que quieres eliminar este libro?")) return;
-  setLibros(getLibros().filter(l => l.id !== id));
-  renderTablaLibros();
-  renderEstadisticas();
-};
 
-function renderTablaLibros() {
   const libros = getLibros();
+  const nuevaLista = [];
+  for (let i = 0; i < libros.length; i++) {
+    if (libros[i].id !== id) nuevaLista.push(libros[i]);
+  }
+  setLibros(nuevaLista);
 
-  document.getElementById("tablaLibros").innerHTML = `
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>ID</th><th>Título</th><th>Autor</th><th>Género</th><th>Estado</th><th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${libros.map(l => `
-          <tr>
-            <td>${l.id}</td>
-            <td>${l.titulo}</td>
-            <td>${l.autor}</td>
-            <td>${l.genero || "—"}</td>
-            <td>
-              <span class="badge ${l.disponible ? "badge-ok" : "badge-off"}">
-                ${l.disponible ? "Disponible" : "Prestado"}
-              </span>
-            </td>
-            <td>
-              <button class="btn btn-danger btn-xs" onclick="eliminarLibro(${l.id})">Eliminar</button>
-            </td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
+  mostrarTablaLibros();
+  mostrarEstadisticas();
+}
+
+function mostrarTablaLibros() {
+  const libros = getLibros();
+  const tabla  = document.getElementById("tablaLibros");
+  tabla.innerHTML = "";
+
+  // crea la tabla con cabecera
+  const t = document.createElement("table");
+  t.className = "tabla";
+  t.innerHTML = "<thead><tr>" +
+    "<th>ID</th><th>Título</th><th>Autor</th><th>Género</th><th>Estado</th><th>Acciones</th>" +
+    "</tr></thead>";
+
+  const tbody = document.createElement("tbody");
+
+  for (let i = 0; i < libros.length; i++) {
+    const l  = libros[i];
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = "<td>" + l.id + "</td>" +
+      "<td>" + l.titulo + "</td>" +
+      "<td>" + l.autor  + "</td>" +
+      "<td>" + (l.genero || "—") + "</td>" +
+      "<td><span class='badge " + (l.disponible ? "badge-ok" : "badge-off") + "'>" +
+        (l.disponible ? "Disponible" : "Prestado") +
+      "</span></td>";
+
+    // celda con botón eliminar
+    const tdAccion = document.createElement("td");
+    const btnEliminar = document.createElement("button");
+    btnEliminar.className = "btn btn-danger btn-xs";
+    btnEliminar.textContent = "Eliminar";
+    btnEliminar.addEventListener("click", function() { eliminarLibro(l.id); });
+    tdAccion.appendChild(btnEliminar);
+    tr.appendChild(tdAccion);
+
+    tbody.appendChild(tr);
+  }
+
+  t.appendChild(tbody);
+  tabla.appendChild(t);
 }
 
 
@@ -113,16 +131,19 @@ function agregarUsuario() {
 
   const usuarios = getUsuarios();
 
-  if (usuarios.find(u => u.nombre === nombre)) {
-    alert("Ya existe un usuario con ese nombre.");
-    return;
+  // comprueba que no exista otro usuario con el mismo nombre
+  for (let i = 0; i < usuarios.length; i++) {
+    if (usuarios[i].nombre === nombre) {
+      alert("Ya existe un usuario con ese nombre.");
+      return;
+    }
   }
 
   usuarios.push({
-    id: nextId(usuarios),
-    nombre,
-    password,
-    rol,
+    id: siguienteId(usuarios),
+    nombre: nombre,
+    password: password,
+    rol: rol,
     penalizado: false,
     fechaFinPenalizacion: null
   });
@@ -131,188 +152,290 @@ function agregarUsuario() {
   document.getElementById("nuevoUsuario").value  = "";
   document.getElementById("nuevoPassword").value = "";
 
-  renderTablaUsuarios();
-  renderEstadisticas();
+  mostrarTablaUsuarios();
+  mostrarEstadisticas();
 }
 
-window.eliminarUsuario = function(id) {
-  if (id === getSesion().id) {
+function eliminarUsuario(id) {
+  const sesion = getSesion();
+  if (id === sesion.id) {
     alert("No puedes eliminar tu propia cuenta.");
     return;
   }
   if (!confirm("¿Seguro que quieres eliminar este usuario?")) return;
-  setUsuarios(getUsuarios().filter(u => u.id !== id));
-  renderTablaUsuarios();
-  renderEstadisticas();
-};
 
-window.ponerPenalizacion = function(id) {
   const usuarios = getUsuarios();
-  const usuario  = usuarios.find(u => u.id === id);
+  const nuevaLista = [];
+  for (let i = 0; i < usuarios.length; i++) {
+    if (usuarios[i].id !== id) nuevaLista.push(usuarios[i]);
+  }
+  setUsuarios(nuevaLista);
+
+  mostrarTablaUsuarios();
+  mostrarEstadisticas();
+}
+
+function ponerPenalizacion(id) {
+  const usuarios = getUsuarios();
+  let usuario = null;
+  for (let i = 0; i < usuarios.length; i++) {
+    if (usuarios[i].id === id) { usuario = usuarios[i]; break; }
+  }
   if (!usuario) return;
 
   const hasta = new Date();
   hasta.setDate(hasta.getDate() + getConfig().maxDias);
 
-  usuario.penalizado            = true;
-  usuario.fechaFinPenalizacion  = hasta.toISOString();
+  usuario.penalizado           = true;
+  usuario.fechaFinPenalizacion = hasta.toISOString();
 
   setUsuarios(usuarios);
-  renderTablaUsuarios();
-};
+  mostrarTablaUsuarios();
+}
 
-window.quitarPenalizacion = function(id) {
+function quitarPenalizacion(id) {
   const usuarios = getUsuarios();
-  const usuario  = usuarios.find(u => u.id === id);
+  let usuario = null;
+  for (let i = 0; i < usuarios.length; i++) {
+    if (usuarios[i].id === id) { usuario = usuarios[i]; break; }
+  }
   if (!usuario) return;
 
-  usuario.penalizado            = false;
-  usuario.fechaFinPenalizacion  = null;
+  usuario.penalizado           = false;
+  usuario.fechaFinPenalizacion = null;
 
   setUsuarios(usuarios);
-  renderTablaUsuarios();
-};
+  mostrarTablaUsuarios();
+}
 
-function renderTablaUsuarios() {
+function mostrarTablaUsuarios() {
   const usuarios = getUsuarios();
+  const tabla    = document.getElementById("tablaUsuarios");
+  tabla.innerHTML = "";
 
-  document.getElementById("tablaUsuarios").innerHTML = `
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>ID</th><th>Nombre</th><th>Rol</th><th>Penalizado</th><th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${usuarios.map(u => `
-          <tr>
-            <td>${u.id}</td>
-            <td>${u.nombre}</td>
-            <td>
-              <span class="badge ${u.rol === "admin" ? "badge-admin" : "badge-user"}">${u.rol}</span>
-            </td>
-            <td>
-              ${u.penalizado
-                ? `<span class="badge badge-error">Sí</span>`
-                : `<span class="badge badge-ok">No</span>`
-              }
-            </td>
-            <td>
-              ${u.penalizado
-                ? `<button class="btn btn-sm btn-primary" onclick="quitarPenalizacion(${u.id})">Quitar penal.</button>`
-                : `<button class="btn btn-sm btn-warn"    onclick="ponerPenalizacion(${u.id})">Penalizar</button>`
-              }
-              <button class="btn btn-danger btn-xs" onclick="eliminarUsuario(${u.id})">Eliminar</button>
-            </td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
+  const t = document.createElement("table");
+  t.className = "tabla";
+  t.innerHTML = "<thead><tr>" +
+    "<th>ID</th><th>Nombre</th><th>Rol</th><th>Penalizado</th><th>Acciones</th>" +
+    "</tr></thead>";
+
+  const tbody = document.createElement("tbody");
+
+  for (let i = 0; i < usuarios.length; i++) {
+    const u  = usuarios[i];
+    const tr = document.createElement("tr");
+
+    // badge del rol
+    const badgeRol = "<span class='badge " + (u.rol === "admin" ? "badge-admin" : "badge-user") + "'>" + u.rol + "</span>";
+
+    // badge de penalización
+    const badgePen = u.penalizado
+      ? "<span class='badge badge-error'>Sí</span>"
+      : "<span class='badge badge-ok'>No</span>";
+
+    tr.innerHTML = "<td>" + u.id + "</td>" +
+      "<td>" + u.nombre + "</td>" +
+      "<td>" + badgeRol + "</td>" +
+      "<td>" + badgePen + "</td>";
+
+    // celda con los botones de acción
+    const tdAccion = document.createElement("td");
+
+    if (u.penalizado) {
+      const btnQuitar = document.createElement("button");
+      btnQuitar.className = "btn btn-sm btn-primary";
+      btnQuitar.textContent = "Quitar penal.";
+      btnQuitar.addEventListener("click", function() { quitarPenalizacion(u.id); });
+      tdAccion.appendChild(btnQuitar);
+    } else {
+      const btnPenalizar = document.createElement("button");
+      btnPenalizar.className = "btn btn-sm btn-warn";
+      btnPenalizar.textContent = "Penalizar";
+      btnPenalizar.addEventListener("click", function() { ponerPenalizacion(u.id); });
+      tdAccion.appendChild(btnPenalizar);
+    }
+
+    const btnEliminar = document.createElement("button");
+    btnEliminar.className = "btn btn-danger btn-xs";
+    btnEliminar.textContent = "Eliminar";
+    btnEliminar.addEventListener("click", function() { eliminarUsuario(u.id); });
+    tdAccion.appendChild(btnEliminar);
+
+    tr.appendChild(tdAccion);
+    tbody.appendChild(tr);
+  }
+
+  t.appendChild(tbody);
+  tabla.appendChild(t);
 }
 
 
 // ─── Préstamos ────────────────────────────────────────────────────────────────
 
-function renderTablaPrestamos() {
+function mostrarTablaPrestamos() {
   const prestamos = getPrestamos();
   const div       = document.getElementById("tablaPrestamos");
+  div.innerHTML   = "";
 
   if (prestamos.length === 0) {
-    div.innerHTML = `<p class="empty-msg">No hay préstamos registrados.</p>`;
+    const msg = document.createElement("p");
+    msg.className   = "empty-msg";
+    msg.textContent = "No hay préstamos registrados.";
+    div.appendChild(msg);
     return;
   }
 
-  div.innerHTML = `
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>ID</th><th>Usuario</th><th>Libro</th><th>F. Préstamo</th><th>F. Devolución</th><th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${prestamos.map(p => {
-          const usuario  = getUsuarioById(p.idUsuario);
-          const nombreU  = usuario ? usuario.nombre : `#${p.idUsuario}`;
-          const vencido  = isVencido(p);
+  const t = document.createElement("table");
+  t.className = "tabla";
+  t.innerHTML = "<thead><tr>" +
+    "<th>ID</th><th>Usuario</th><th>Libro</th><th>F. Préstamo</th><th>F. Devolución</th><th>Estado</th>" +
+    "</tr></thead>";
 
-          return `
-            <tr>
-              <td>${p.id}</td>
-              <td>${nombreU}</td>
-              <td>${p.tituloLibro}</td>
-              <td>${new Date(p.fechaPrestamo).toLocaleDateString("es-ES")}</td>
-              <td>${new Date(p.fechaDevolucion).toLocaleDateString("es-ES")}</td>
-              <td>
-                ${p.devuelto
-                  ? `<span class="badge badge-ok">Devuelto</span>`
-                  : vencido
-                    ? `<span class="badge badge-error">Vencido</span>`
-                    : `<span class="badge badge-warn">Activo</span>`
-                }
-              </td>
-            </tr>
-          `;
-        }).join("")}
-      </tbody>
-    </table>
-  `;
+  const tbody = document.createElement("tbody");
+
+  for (let i = 0; i < prestamos.length; i++) {
+    const p       = prestamos[i];
+    const usuario = getUsuarioPorId(p.idUsuario);
+    const nombre  = usuario ? usuario.nombre : "#" + p.idUsuario;
+    const vencido = estaVencido(p);
+
+    let badgeEstado = "";
+    if (p.devuelto) {
+      badgeEstado = "<span class='badge badge-ok'>Devuelto</span>";
+    } else if (vencido) {
+      badgeEstado = "<span class='badge badge-error'>Vencido</span>";
+    } else {
+      badgeEstado = "<span class='badge badge-warn'>Activo</span>";
+    }
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = "<td>" + p.id + "</td>" +
+      "<td>" + nombre + "</td>" +
+      "<td>" + p.tituloLibro + "</td>" +
+      "<td>" + new Date(p.fechaPrestamo).toLocaleDateString("es-ES")   + "</td>" +
+      "<td>" + new Date(p.fechaDevolucion).toLocaleDateString("es-ES") + "</td>" +
+      "<td>" + badgeEstado + "</td>";
+
+    tbody.appendChild(tr);
+  }
+
+  t.appendChild(tbody);
+  div.appendChild(t);
 }
 
 
 // ─── Estadísticas ─────────────────────────────────────────────────────────────
 
-function renderEstadisticas() {
+function mostrarEstadisticas() {
   const libros    = getLibros();
   const usuarios  = getUsuarios();
   const prestamos = getPrestamos();
 
-  const libroMasPrestado  = calcularMasPrestado(prestamos);
-  const usuarioMasRetraso = calcularMasRetrasos(prestamos);
-  const tiempoMedio       = calcularTiempoMedio(prestamos);
+  const div = document.getElementById("estadisticas");
+  div.innerHTML = "";
 
-  document.getElementById("estadisticas").innerHTML = `
-    <div class="stat-card"><span class="stat-num">${libros.length}</span><span>Libros totales</span></div>
-    <div class="stat-card"><span class="stat-num">${usuarios.length}</span><span>Usuarios</span></div>
-    <div class="stat-card"><span class="stat-num">${prestamos.filter(p => !p.devuelto).length}</span><span>Préstamos activos</span></div>
-    <div class="stat-card"><span class="stat-num">${prestamos.length}</span><span>Préstamos histórico</span></div>
-    <div class="stat-card"><span class="stat-num">${libroMasPrestado}</span><span>Libro más prestado</span></div>
-    <div class="stat-card"><span class="stat-num">${usuarioMasRetraso}</span><span>Más retrasos</span></div>
-    <div class="stat-card"><span class="stat-num">${tiempoMedio} días</span><span>Tiempo medio devolución</span></div>
-    <div class="stat-card"><span class="stat-num">${usuarios.filter(u => u.penalizado).length}</span><span>Penalizados ahora</span></div>
-  `;
+  // cuenta préstamos activos
+  let prestamosActivos = 0;
+  for (let i = 0; i < prestamos.length; i++) {
+    if (!prestamos[i].devuelto) prestamosActivos++;
+  }
+
+  // cuenta usuarios penalizados
+  let penalizados = 0;
+  for (let i = 0; i < usuarios.length; i++) {
+    if (usuarios[i].penalizado) penalizados++;
+  }
+
+  const libroTop   = libroMasPrestado(prestamos);
+  const usuarioTop = usuarioConMasRetrasos(prestamos);
+  const tiempoMed  = tiempoMedioDevolucion(prestamos);
+
+  // array con los datos de cada tarjeta [número, etiqueta]
+  const tarjetas = [
+    [libros.length,       "Libros totales"],
+    [usuarios.length,     "Usuarios"],
+    [prestamosActivos,    "Préstamos activos"],
+    [prestamos.length,    "Préstamos histórico"],
+    [libroTop,            "Libro más prestado"],
+    [usuarioTop,          "Más retrasos"],
+    [tiempoMed + " días", "Tiempo medio devolución"],
+    [penalizados,         "Penalizados ahora"]
+  ];
+
+  for (let i = 0; i < tarjetas.length; i++) {
+    const card = document.createElement("div");
+    card.className = "stat-card";
+
+    const num = document.createElement("span");
+    num.className   = "stat-num";
+    num.textContent = tarjetas[i][0];
+
+    const label = document.createElement("span");
+    label.textContent = tarjetas[i][1];
+
+    card.appendChild(num);
+    card.appendChild(label);
+    div.appendChild(card);
+  }
 }
 
-function calcularMasPrestado(prestamos) {
+function libroMasPrestado(prestamos) {
+  // cuenta cuántas veces se prestó cada libro
   const conteo = {};
-  prestamos.forEach(p => {
-    conteo[p.tituloLibro] = (conteo[p.tituloLibro] || 0) + 1;
-  });
-  const top = Object.entries(conteo).sort((a, b) => b[1] - a[1])[0];
-  return top ? top[0] : "—";
+  for (let i = 0; i < prestamos.length; i++) {
+    const titulo = prestamos[i].tituloLibro;
+    conteo[titulo] = (conteo[titulo] || 0) + 1;
+  }
+
+  let masVeces = 0;
+  let libroTop = "—";
+  for (const titulo in conteo) {
+    if (conteo[titulo] > masVeces) {
+      masVeces = conteo[titulo];
+      libroTop = titulo;
+    }
+  }
+  return libroTop;
 }
 
-function calcularMasRetrasos(prestamos) {
+function usuarioConMasRetrasos(prestamos) {
+  // cuenta los retrasos por usuario (solo los préstamos con penalización aplicada)
   const retrasos = {};
-  prestamos
-    .filter(p => p.penalizacionAplicada)
-    .forEach(p => {
-      const u      = getUsuarioById(p.idUsuario);
-      const nombre = u ? u.nombre : `#${p.idUsuario}`;
+  for (let i = 0; i < prestamos.length; i++) {
+    if (prestamos[i].penalizacionAplicada) {
+      const usuario = getUsuarioPorId(prestamos[i].idUsuario);
+      const nombre  = usuario ? usuario.nombre : "#" + prestamos[i].idUsuario;
       retrasos[nombre] = (retrasos[nombre] || 0) + 1;
-    });
-  const top = Object.entries(retrasos).sort((a, b) => b[1] - a[1])[0];
-  return top ? top[0] : "—";
+    }
+  }
+
+  let masRetrasos  = 0;
+  let usuarioTop   = "—";
+  for (const nombre in retrasos) {
+    if (retrasos[nombre] > masRetrasos) {
+      masRetrasos = retrasos[nombre];
+      usuarioTop  = nombre;
+    }
+  }
+  return usuarioTop;
 }
 
-function calcularTiempoMedio(prestamos) {
-  const devueltos = prestamos.filter(p => p.devuelto && p.fechaDevolucionReal);
-  if (devueltos.length === 0) return 0;
+function tiempoMedioDevolucion(prestamos) {
+  // calcula el promedio de días entre que se prestó y se devolvió
+  let total    = 0;
+  let cantidad = 0;
 
-  const totalDias = devueltos.reduce((acc, p) => {
-    const dias = (new Date(p.fechaDevolucionReal) - new Date(p.fechaPrestamo)) / (1000 * 60 * 60 * 24);
-    return acc + dias;
-  }, 0);
+  for (let i = 0; i < prestamos.length; i++) {
+    const p = prestamos[i];
+    if (p.devuelto && p.fechaDevolucionReal) {
+      const inicio = new Date(p.fechaPrestamo);
+      const fin    = new Date(p.fechaDevolucionReal);
+      const dias   = (fin - inicio) / (1000 * 60 * 60 * 24); // convierte milisegundos a días
+      total += dias;
+      cantidad++;
+    }
+  }
 
-  return (totalDias / devueltos.length).toFixed(1);
+  if (cantidad === 0) return 0;
+  return (total / cantidad).toFixed(1); // toFixed(1) deja un decimal
 }

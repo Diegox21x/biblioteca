@@ -1,100 +1,194 @@
-// misPrestamos.js - pagina donde el usuario ve sus prestamos
+// misPrestamos.js - muestra los préstamos del usuario actual
 
-document.addEventListener("DOMContentLoaded", () => {
-  const sesion = getSesion();
-  const usuario = getUsuarioById(sesion.id);
+document.addEventListener("DOMContentLoaded", function() {
+  const sesion  = getSesion();
+  const usuario = getUsuarioPorId(sesion.id);
 
-  // si el usuario tiene penalizacion activa muestro hasta cuando dura
-  const alertPen = document.getElementById("alertPenalizado");
+  // si el usuario está penalizado muestra hasta cuándo dura la penalización
   if (usuario.penalizado) {
     const fecha = new Date(usuario.fechaFinPenalizacion).toLocaleDateString("es-ES");
-    alertPen.textContent = `Tienes una penalizacion activa hasta el ${fecha}. No puedes solicitar nuevos prestamos.`;
-    alertPen.classList.remove("hidden");
+    const alerta = document.getElementById("alertPenalizado");
+    alerta.textContent = "Tienes una penalización activa hasta el " + fecha + ". No puedes solicitar nuevos préstamos.";
+    alerta.classList.remove("hidden");
   }
 
-  // pinto los prestamos al cargar
-  renderPrestamos();
-
-  function renderPrestamos() {
-    // separo los prestamos del usuario en activos e historial
-    const prestamos = getPrestamos().filter(p => p.idUsuario === sesion.id);
-    const activos = prestamos.filter(p => !p.devuelto);
-    const historial = prestamos.filter(p => p.devuelto);
-
-    const divActivos = document.getElementById("prestamosActivos");
-    const divHistorial = document.getElementById("prestamosHistorial");
-
-    // seccion de prestamos activos
-    divActivos.innerHTML = `<h3>Prestamos activos (${activos.length})</h3>`;
-    if (activos.length === 0) {
-      divActivos.innerHTML += `<p class="empty-msg">No tienes prestamos activos.</p>`;
-    } else {
-      divActivos.innerHTML += activos.map(p => {
-        const vencido = isVencido(p);
-        const fechaDev = new Date(p.fechaDevolucion).toLocaleDateString("es-ES");
-        const fechaPres = new Date(p.fechaPrestamo).toLocaleDateString("es-ES");
-
-        // si esta vencido le añado la clase de color rojo
-        return `
-          <div class="prestamo-card ${vencido ? "prestamo-vencido" : ""}">
-            <div class="prestamo-info">
-              <strong>${p.tituloLibro}</strong>
-              <span>Prestado: ${fechaPres}</span>
-              <span>Devolver antes de: <strong>${fechaDev}</strong></span>
-              ${vencido ? `<span class="badge badge-error">VENCIDO</span>` : ""}
-            </div>
-            <button class="btn btn-warn btn-sm" onclick="devolver(${p.id})">Devolver</button>
-          </div>
-        `;
-      }).join("");
-    }
-
-    // seccion de historial de prestamos ya devueltos
-    divHistorial.innerHTML = `<h3>Historial (${historial.length})</h3>`;
-    if (historial.length === 0) {
-      divHistorial.innerHTML += `<p class="empty-msg">Sin historial todavia.</p>`;
-    } else {
-      divHistorial.innerHTML += historial.map(p => {
-        const fechaDev = new Date(p.fechaDevolucion).toLocaleDateString("es-ES");
-
-        // si no tiene fecha real de devolucion muestro un guion
-        const fechaReal = p.fechaDevolucionReal
-          ? new Date(p.fechaDevolucionReal).toLocaleDateString("es-ES")
-          : "-";
-
-        return `
-          <div class="prestamo-card prestamo-devuelto">
-            <div class="prestamo-info">
-              <strong>${p.tituloLibro}</strong>
-              <span>Fecha limite: ${fechaDev}</span>
-              <span>Devuelto: ${fechaReal}</span>
-            </div>
-            <span class="badge badge-ok">Devuelto</span>
-          </div>
-        `;
-      }).join("");
-    }
-  }
-
-  // funcion para devolver un libro desde esta pagina
-  window.devolver = function(idPrestamo) {
-    const prestamos = getPrestamos();
-    const prestamo = prestamos.find(p => p.id === idPrestamo);
-    if (!prestamo) return;
-
-    // marco como devuelto y guardo la fecha real
-    prestamo.devuelto = true;
-    prestamo.fechaDevolucionReal = new Date().toISOString();
-
-    // el libro vuelve a estar disponible en el catalogo
-    const libros = getLibros();
-    const libro = libros.find(l => l.id === prestamo.idLibro);
-    if (libro) libro.disponible = true;
-
-    setLibros(libros);
-    setPrestamos(prestamos);
-
-    // recargo la lista para que se vea el cambio
-    renderPrestamos();
-  };
+  mostrarPrestamos();
 });
+
+
+// ─── Mostrar préstamos ────────────────────────────────────────────────────────
+
+function mostrarPrestamos() {
+  const sesion    = getSesion();
+  const prestamos = getPrestamos();
+
+  // separa los préstamos del usuario en activos y ya devueltos
+  const activos   = [];
+  const historial = [];
+
+  for (let i = 0; i < prestamos.length; i++) {
+    const p = prestamos[i];
+    if (p.idUsuario !== sesion.id) continue; // salta los préstamos de otros usuarios
+
+    if (p.devuelto) {
+      historial.push(p);
+    } else {
+      activos.push(p);
+    }
+  }
+
+  mostrarActivos(activos);
+  mostrarHistorial(historial);
+}
+
+function mostrarActivos(activos) {
+  const div = document.getElementById("prestamosActivos");
+  div.innerHTML = "";
+
+  // título de sección
+  const titulo = document.createElement("h3");
+  titulo.textContent = "Préstamos activos (" + activos.length + ")";
+  div.appendChild(titulo);
+
+  if (activos.length === 0) {
+    const msg = document.createElement("p");
+    msg.className = "empty-msg";
+    msg.textContent = "No tienes préstamos activos.";
+    div.appendChild(msg);
+    return;
+  }
+
+  for (let i = 0; i < activos.length; i++) {
+    div.appendChild(crearTarjetaActivo(activos[i]));
+  }
+}
+
+function crearTarjetaActivo(p) {
+  const vencido   = estaVencido(p);
+  const fechaPres = new Date(p.fechaPrestamo).toLocaleDateString("es-ES");
+  const fechaDev  = new Date(p.fechaDevolucion).toLocaleDateString("es-ES");
+
+  const tarjeta = document.createElement("div");
+  // si está vencido añade el borde rojo
+  tarjeta.className = "prestamo-card" + (vencido ? " prestamo-vencido" : "");
+
+  // información del préstamo
+  const info = document.createElement("div");
+  info.className = "prestamo-info";
+
+  const nombre = document.createElement("strong");
+  nombre.textContent = p.tituloLibro;
+  info.appendChild(nombre);
+
+  const fechaInicio = document.createElement("span");
+  fechaInicio.textContent = "Prestado: " + fechaPres;
+  info.appendChild(fechaInicio);
+
+  const fechaLimite = document.createElement("span");
+  fechaLimite.innerHTML = "Devolver antes de: <strong>" + fechaDev + "</strong>";
+  info.appendChild(fechaLimite);
+
+  // badge de vencido si corresponde
+  if (vencido) {
+    const badge = document.createElement("span");
+    badge.className = "badge badge-error";
+    badge.textContent = "VENCIDO";
+    info.appendChild(badge);
+  }
+
+  // botón para devolver el libro
+  const btnDevolver = document.createElement("button");
+  btnDevolver.className = "btn btn-warn btn-sm";
+  btnDevolver.textContent = "Devolver";
+  btnDevolver.addEventListener("click", function() {
+    devolverPrestamo(p.id);
+  });
+
+  tarjeta.appendChild(info);
+  tarjeta.appendChild(btnDevolver);
+
+  return tarjeta;
+}
+
+function mostrarHistorial(historial) {
+  const div = document.getElementById("prestamosHistorial");
+  div.innerHTML = "";
+
+  const titulo = document.createElement("h3");
+  titulo.textContent = "Historial (" + historial.length + ")";
+  div.appendChild(titulo);
+
+  if (historial.length === 0) {
+    const msg = document.createElement("p");
+    msg.className = "empty-msg";
+    msg.textContent = "Sin historial todavía.";
+    div.appendChild(msg);
+    return;
+  }
+
+  for (let i = 0; i < historial.length; i++) {
+    div.appendChild(crearTarjetaHistorial(historial[i]));
+  }
+}
+
+function crearTarjetaHistorial(p) {
+  const fechaDev  = new Date(p.fechaDevolucion).toLocaleDateString("es-ES");
+  const fechaReal = p.fechaDevolucionReal ? new Date(p.fechaDevolucionReal).toLocaleDateString("es-ES") : "-";
+
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "prestamo-card prestamo-devuelto";
+
+  const info = document.createElement("div");
+  info.className = "prestamo-info";
+
+  const nombre = document.createElement("strong");
+  nombre.textContent = p.tituloLibro;
+  info.appendChild(nombre);
+
+  const limite = document.createElement("span");
+  limite.textContent = "Fecha límite: " + fechaDev;
+  info.appendChild(limite);
+
+  const devuelto = document.createElement("span");
+  devuelto.textContent = "Devuelto: " + fechaReal;
+  info.appendChild(devuelto);
+
+  const badge = document.createElement("span");
+  badge.className = "badge badge-ok";
+  badge.textContent = "Devuelto";
+
+  tarjeta.appendChild(info);
+  tarjeta.appendChild(badge);
+
+  return tarjeta;
+}
+
+// ─── Devolver lubros ─────────────────────────────────────────────────────────────────
+
+function devolverPrestamo(idPrestamo) {
+  const prestamos = getPrestamos();
+  let prestamo = null;
+
+  for (let i = 0; i < prestamos.length; i++) {
+    if (prestamos[i].id === idPrestamo) { prestamo = prestamos[i]; break; }
+  }
+  if (!prestamo) return;
+
+  prestamo.devuelto            = true;
+  prestamo.fechaDevolucionReal = new Date().toISOString();
+
+  // marca el libro como disponible de nuevo
+  const libros = getLibros();
+  for (let i = 0; i < libros.length; i++) {
+    if (libros[i].id === prestamo.idLibro) {
+      libros[i].disponible = true;
+      break;
+    }
+  }
+
+  setLibros(libros);
+  setPrestamos(prestamos);
+
+  // recarga la lista para mostrar el cambio
+  mostrarPrestamos();
+}

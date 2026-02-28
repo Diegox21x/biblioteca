@@ -1,60 +1,57 @@
-// datos.js - aqui estan todas las funciones para manejar el localStorage
+// datos.js - guardar y leer datos del navegador (localStorage)
+// localStorage es como una "memoria" del navegador que no se borra al cerrar la página
 
-// claves que uso para guardar cada cosa en el localStorage
-const KEYS = {
-  usuarios: "bib_usuarios",
-  libros: "bib_libros",
-  prestamos: "bib_prestamos",
-  config: "bib_config",
-  sesion: "bib_sesion"
-};
 
-// devuelve la configuracion del sistema, si no existe la crea con valores por defecto
+// ─── Configuración ────────────────────────────────────────────────────────────
+
 function getConfig() {
-  const cfg = localStorage.getItem(KEYS.config);
-  if (cfg) return JSON.parse(cfg);
-  const defecto = { maxLibros: 3, maxDias: 14 };
-  localStorage.setItem(KEYS.config, JSON.stringify(defecto));
-  return defecto;
+  // intenta leer la configuración guardada, si no existe devuelve los valores por defecto
+  const guardado = localStorage.getItem("config");
+  if (guardado) 
+    return JSON.parse(guardado);
+  return { maxLibros: 3, maxDias: 14 };
 }
 
-// guarda la configuracion en el localStorage
-function setConfig(cfg) {
-  localStorage.setItem(KEYS.config, JSON.stringify(cfg));
+function setConfig(datos) {
+  // JSON.stringify convierte el objeto a texto para poder guardarlo
+  localStorage.setItem("config", JSON.stringify(datos));
 }
 
-// devuelve el array de usuarios, si no existe lo crea con tres usuarios de prueba
+
+// ─── Usuarios ─────────────────────────────────────────────────────────────────
+
 function getUsuarios() {
-  const data = localStorage.getItem(KEYS.usuarios);
-  if (data) return JSON.parse(data);
+  const guardado = localStorage.getItem("usuarios");
+  if (guardado) return JSON.parse(guardado);
 
-  // usuarios iniciales para poder probar la aplicacion
-  const inicial = [
+  // si no hay usuarios guardados, crea los de prueba la primera vez
+  const usuariosPrueba = [
     { id: 1, nombre: "admin", password: "admin", rol: "admin", penalizado: false, fechaFinPenalizacion: null },
-    { id: 2, nombre: "user1", password: "1234", rol: "user", penalizado: false, fechaFinPenalizacion: null },
-    { id: 3, nombre: "user2", password: "1234", rol: "user", penalizado: false, fechaFinPenalizacion: null }
+    { id: 2, nombre: "user1", password: "1234",  rol: "user", penalizado: false, fechaFinPenalizacion: null },
+    { id: 3, nombre: "user2", password: "1234",  rol: "user", penalizado: false, fechaFinPenalizacion: null }
   ];
-  localStorage.setItem(KEYS.usuarios, JSON.stringify(inicial));
-  return inicial;
+  localStorage.setItem("usuarios", JSON.stringify(usuariosPrueba));
+  return usuariosPrueba;
 }
 
-// guarda el array de usuarios actualizado
 function setUsuarios(lista) {
-  localStorage.setItem(KEYS.usuarios, JSON.stringify(lista));
+  localStorage.setItem("usuarios", JSON.stringify(lista));
 }
 
-// busca un usuario por su id
-function getUsuarioById(id) {
-  return getUsuarios().find(u => u.id === id);
+function getUsuarioPorId(id) {
+  // find recorre el array y devuelve el primer elemento que cumpla la condición
+  return getUsuarios().find(function(u) { return u.id === id; });
 }
 
-// devuelve el array de libros, si no existe lo crea con libros de ejemplo
+
+// ─── Libros ───────────────────────────────────────────────────────────────────
+
 function getLibros() {
-  const data = localStorage.getItem(KEYS.libros);
-  if (data) return JSON.parse(data);
+  const guardado = localStorage.getItem("libros");
+  if (guardado) return JSON.parse(guardado);
 
-  // libros iniciales para que la app no este vacia al abrirla
-  const inicial = [
+  // libros de ejemplo para que la app no esté vacía al abrirla
+  const librosPrueba = [
     { id: 1, titulo: "El Quijote", autor: "Cervantes", genero: "Clasico", disponible: true },
     { id: 2, titulo: "1984", autor: "George Orwell", genero: "Distopia", disponible: true },
     { id: 3, titulo: "La Odisea", autor: "Homero", genero: "Epica", disponible: true },
@@ -62,93 +59,145 @@ function getLibros() {
     { id: 5, titulo: "El señor de los anillos", autor: "J.R.R. Tolkien", genero: "Fantasia", disponible: true },
     { id: 6, titulo: "Crimen y castigo", autor: "Dostoyevski", genero: "Clasico", disponible: true }
   ];
-  localStorage.setItem(KEYS.libros, JSON.stringify(inicial));
-  return inicial;
+  localStorage.setItem("libros", JSON.stringify(librosPrueba));
+  return librosPrueba;
 }
 
-// guarda el array de libros actualizado
 function setLibros(lista) {
-  localStorage.setItem(KEYS.libros, JSON.stringify(lista));
+  localStorage.setItem("libros", JSON.stringify(lista));
 }
 
-// devuelve todos los prestamos o un array vacio si no hay ninguno
+
+// ─── Préstamos ────────────────────────────────────────────────────────────────
+
 function getPrestamos() {
-  const data = localStorage.getItem(KEYS.prestamos);
-  return data ? JSON.parse(data) : [];
+  const guardado = localStorage.getItem("prestamos");
+  if (guardado) return JSON.parse(guardado);
+  return []; // si no hay prestamos devuelve un array vacio
 }
 
-// guarda el array de prestamos
 function setPrestamos(lista) {
-  localStorage.setItem(KEYS.prestamos, JSON.stringify(lista));
+  localStorage.setItem("prestamos", JSON.stringify(lista));
 }
 
-// devuelve el usuario que tiene la sesion activa o null si no hay sesion
+function getPrestamosActivos(idUsuario) {
+  // devuelve solo los préstamos que no han sido devueltos todavia
+  return getPrestamos().filter(function(p) {
+    return p.idUsuario === idUsuario && p.devuelto === false;
+  });
+}
+
+
+// ─── Sesión ───────────────────────────────────────────────────────────────────
+
 function getSesion() {
-  const data = localStorage.getItem(KEYS.sesion);
-  return data ? JSON.parse(data) : null;
+  const guardado = localStorage.getItem("sesion");
+  if (guardado)
+    return JSON.parse(guardado);
+
+    return null; // null si no hay nadie logeado
 }
 
-// guarda el usuario en sesion
 function setSesion(usuario) {
-  localStorage.setItem(KEYS.sesion, JSON.stringify(usuario));
+  localStorage.setItem("sesion", JSON.stringify(usuario));
 }
 
-// borra la sesion y manda al login
 function cerrarSesion() {
-  localStorage.removeItem(KEYS.sesion);
+  localStorage.removeItem("sesion");
   window.location.href = "login.html";
 }
 
-// devuelve solo los prestamos activos de un usuario concreto
-function getPrestamosActivos(idUsuario) {
-  return getPrestamos().filter(p => p.idUsuario === idUsuario && !p.devuelto);
+
+// ─── Utilidades ───────────────────────────────────────────────────────────────
+
+function siguienteId(lista) {
+  // genera un id nuevo sumando 1 al id más alto que exista en el array
+  if (lista.length === 0) return 1;
+  let maxId = 0;
+  for (let i = 0; i < lista.length; i++) {
+    if (lista[i].id > maxId) maxId = lista[i].id;
+  }
+  return maxId + 1;
 }
 
-// comprueba si un prestamo ha pasado su fecha limite y no se ha devuelto
-function isVencido(prestamo) {
-  return new Date() > new Date(prestamo.fechaDevolucion) && !prestamo.devuelto;
+function estaVencido(prestamo) {
+  // compara la fecha de hoy con la fecha límite del préstamo
+  const hoy = new Date();
+  const limite = new Date(prestamo.fechaDevolucion);
+  return hoy > limite && prestamo.devuelto === false;
 }
 
-// genera el siguiente id disponible para un array
-function nextId(lista) {
-  return lista.length === 0 ? 1 : Math.max(...lista.map(x => x.id)) + 1;
+function emojiGenero(genero) {
+  // devuelve un emoji según el género del libro
+  if (genero === "Clasico")         
+    return "🏛️";
+  if (genero === "Distopia")        
+    return "🌑";
+  if (genero === "Epica")           
+    return "⚔️";
+  if (genero === "Fantasia")        
+    return "🧙";
+  if (genero === "Realismo magico") 
+    return "🌀";
+  if (genero === "Terror")          
+    return "👻";
+  if (genero === "Ciencia ficcion") 
+    return "🚀";
+  if (genero === "Romance")         
+    return "💕";
+  if (genero === "Historia")        
+    return "📜";
+  return "📖";
 }
 
-// revisa todos los prestamos y aplica o levanta penalizaciones automaticamente
+// ─── Penalizaciones automáticas ───────────────────────────────────────────────
+
 function verificarPenalizaciones() {
   const prestamos = getPrestamos();
-  const usuarios = getUsuarios();
-  const config = getConfig();
-  let cambio = false;
+  const usuarios  = getUsuarios();
+  const config    = getConfig();
+  let huboCambios = false;
 
-  // si un prestamo esta vencido y no tiene penalizacion aplicada, penalizo al usuario
-  prestamos.forEach(p => {
-    if (!p.devuelto && isVencido(p) && !p.penalizacionAplicada) {
-      const u = usuarios.find(u => u.id === p.idUsuario);
-      if (u && !u.penalizado) {
+  // recorre todos los préstamos buscando los vencidos sin penalizar
+  for (let i = 0; i < prestamos.length; i++) {
+    const p = prestamos[i];
+    if (p.devuelto === false && estaVencido(p) && p.penalizacionAplicada === false) {
+
+      // busca al usuario dueño del préstamo
+      let usuario = null;
+      for (let j = 0; j < usuarios.length; j++) {
+        if (usuarios[j].id === p.idUsuario) { usuario = usuarios[j]; break; }
+      }
+
+      if (usuario && usuario.penalizado === false) {
+        // calcula hasta cuándo dura la penalización
         const hasta = new Date();
         hasta.setDate(hasta.getDate() + config.maxDias);
-        u.penalizado = true;
-        u.fechaFinPenalizacion = hasta.toISOString();
-        p.penalizacionAplicada = true;
-        cambio = true;
+
+        usuario.penalizado           = true;
+        usuario.fechaFinPenalizacion = hasta.toISOString();
+        p.penalizacionAplicada       = true;
+        huboCambios = true;
       }
     }
-  });
+  }
 
-  // si la penalizacion ya expiro la quito automaticamente
-  usuarios.forEach(u => {
+  // levanta las penalizaciones que ya han expirado
+  for (let i = 0; i < usuarios.length; i++) {
+    const u = usuarios[i];
     if (u.penalizado && u.fechaFinPenalizacion) {
-      if (new Date() > new Date(u.fechaFinPenalizacion)) {
-        u.penalizado = false;
+      const hoy   = new Date();
+      const hasta = new Date(u.fechaFinPenalizacion);
+      if (hoy > hasta) {
+        u.penalizado           = false;
         u.fechaFinPenalizacion = null;
-        cambio = true;
+        huboCambios = true;
       }
     }
-  });
+  }
 
-  // solo guardo si hubo algun cambio para no escribir en localStorage de mas
-  if (cambio) {
+  // solo guarda si hubo algún cambio para no escribir innecesariamente
+  if (huboCambios) {
     setUsuarios(usuarios);
     setPrestamos(prestamos);
   }
