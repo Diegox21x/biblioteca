@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca - Acceso</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<!-- la clase login-page centra el formulario en el medio de la pantalla -->
+<body class="login-page">
+
+  <div class="login-container">
+
+    <div class="login-logo">📚</div>
+    <h1 class="login-title">Biblioteca</h1>
+    <p class="login-subtitle">Accede a tu cuenta</p>
+
+    <!-- div donde muestro el error si el usuario o contraseña son incorrectos -->
+    <div id="loginError" class="alert alert-error hidden"></div>
+
+    <!-- campo de nombre de usuario -->
+    <div class="form-group">
+      <label for="usuario">Usuario</label>
+      <input type="text" id="usuario" placeholder="Tu nombre de usuario">
+    </div>
+
+    <!-- campo de contraseña, con enter tambien hace login -->
+    <div class="form-group">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="********">
+    </div>
+
+    <button class="btn btn-primary btn-full" id="btnLogin">Entrar</button>
+
+    <!-- usuarios de prueba para que el profe pueda probar la app -->
+    <p class="login-hint">
+      <strong>Demo:</strong> admin/admin · user1/1234 · user2/1234
+    </p>
+
+  </div>
+
+  <!-- primero cargo los datos y luego auth que es donde esta la logica del login -->
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

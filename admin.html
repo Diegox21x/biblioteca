@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca - Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- barra de navegacion comun a todas las paginas -->
+  <nav class="navbar">
+    <span class="nav-logo">Biblioteca</span>
+    <div class="nav-links">
+      <a href="catalogo.html" class="nav-link">Catalogo</a>
+      <a href="misPrestamos.html" class="nav-link">Mis Prestamos</a>
+      <a href="admin.html" class="nav-link active">Admin</a>
+    </div>
+    <div class="nav-right">
+      <!-- el nombre del usuario lo meto con js -->
+      <span id="navUser" class="nav-user"></span>
+      <button class="btn btn-outline btn-sm" id="btnLogout">Salir</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <h2>Panel de Administracion</h2>
+    </div>
+
+    <!-- seccion para cambiar el maximo de libros y dias de prestamo -->
+    <section class="admin-section">
+      <h3>Configuracion del sistema</h3>
+      <div class="config-row">
+        <label>Maximo de libros por usuario:</label>
+        <input type="number" id="cfgMaxLibros" min="1" max="10" class="input-sm">
+        <button class="btn btn-sm btn-primary" id="btnGuardarConfig">Guardar</button>
+      </div>
+      <div class="config-row">
+        <label>Duracion maxima del prestamo (dias):</label>
+        <input type="number" id="cfgMaxDias" min="1" max="60" class="input-sm">
+      </div>
+    </section>
+
+    <!-- estadisticas generales del sistema -->
+    <section class="admin-section">
+      <h3>Estadisticas</h3>
+      <!-- las tarjetas de estadisticas las genera admin.js -->
+      <div id="estadisticas" class="stats-grid"></div>
+    </section>
+
+    <!-- crud de libros: añadir y eliminar -->
+    <section class="admin-section">
+      <h3>Gestion de Libros</h3>
+      <div class="form-inline">
+        <input type="text" id="nuevoTitulo" placeholder="Titulo" class="input-md">
+        <input type="text" id="nuevoAutor" placeholder="Autor" class="input-md">
+        <input type="text" id="nuevoGenero" placeholder="Genero" class="input-md">
+        <button class="btn btn-primary btn-sm" id="btnAddLibro">+ Añadir</button>
+      </div>
+      <!-- la tabla de libros la pinta admin.js -->
+      <div id="tablaLibros" class="tabla-container"></div>
+    </section>
+
+    <!-- crud de usuarios: añadir, penalizar y eliminar -->
+    <section class="admin-section">
+      <h3>Gestion de Usuarios</h3>
+      <div class="form-inline">
+        <input type="text" id="nuevoUsuario" placeholder="Nombre" class="input-md">
+        <input type="password" id="nuevoPassword" placeholder="Contrasena" class="input-md">
+        <select id="nuevoRol" class="input-md">
+          <option value="user">Usuario</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button class="btn btn-primary btn-sm" id="btnAddUsuario">+ Añadir</button>
+      </div>
+      <!-- la tabla de usuarios la pinta admin.js -->
+      <div id="tablaUsuarios" class="tabla-container"></div>
+    </section>
+
+    <!-- historial de todos los prestamos del sistema -->
+    <section class="admin-section">
+      <h3>Todos los Prestamos</h3>
+      <!-- la tabla de prestamos la pinta admin.js -->
+      <div id="tablaPrestamos" class="tabla-container"></div>
+    </section>
+  </main>
+
+  <!-- primero cargo los datos, luego auth para proteger la pagina, luego la logica -->
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

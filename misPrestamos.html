@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca - Mis Prestamos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- navbar igual que en las otras paginas -->
+  <nav class="navbar">
+    <span class="nav-logo">Biblioteca</span>
+    <div class="nav-links">
+      <a href="catalogo.html" class="nav-link">Catalogo</a>
+      <a href="misPrestamos.html" class="nav-link active">Mis Prestamos</a>
+      <!-- el enlace de admin solo aparece si el usuario tiene rol admin -->
+      <span id="navAdmin" class="hidden"><a href="admin.html" class="nav-link">Admin</a></span>
+    </div>
+    <div class="nav-right">
+      <!-- auth.js mete aqui el nombre del usuario -->
+      <span id="navUser" class="nav-user"></span>
+      <button class="btn btn-outline btn-sm" id="btnLogout">Salir</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <h2>Mis Prestamos</h2>
+    </div>
+
+    <!-- alerta de penalizacion, misPrestamos.js la rellena y muestra si toca -->
+    <div id="alertPenalizado" class="alert alert-error hidden"></div>
+
+    <!-- aqui misPrestamos.js pinta los prestamos activos -->
+    <div id="prestamosActivos"></div>
+
+    <!-- aqui misPrestamos.js pinta el historial de prestamos devueltos -->
+    <div id="prestamosHistorial"></div>
+  </main>
+
+  <!-- orden importante: primero datos, luego auth, luego la logica de la pagina -->
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/misPrestamos.js"></script>
+</body>
+</html>

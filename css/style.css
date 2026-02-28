@@ -1,0 +1,540 @@
+/* style.css - estilos de la biblioteca, estilo retro moderno */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+/* variables de color - paleta retro vibrante */
+:root {
+  --bg: #0d0d0d;
+  --bg2: #161616;
+  --surface: #1a1a1a;
+  --surface2: #222222;
+  --border: #2e2e2e;
+  --text: #f0ece0;
+  --text2: #888070;
+  --primary: #ff6b35;
+  --primary-hover: #e85520;
+  --accent: #ffd23f;
+  --accent2: #06d6a0;
+  --cool: #4cc9f0;
+  --ok: #06d6a0;
+  --warn: #ffd23f;
+  --error: #ff4d6d;
+  --admin: #c77dff;
+  --radius: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* titulos con la fuente monoespaciada para el toque retro */
+h1, h2, h3 { font-family: 'Syne', sans-serif; font-weight: 800; }
+
+/* linea de acento naranja arriba de toda la pagina */
+body::before {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--accent2));
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+}
+
+/* navbar oscura con borde inferior de acento */
+.navbar {
+  background: var(--bg2);
+  color: var(--text);
+  padding: 0 2rem;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 3px;
+  z-index: 100;
+}
+
+.nav-logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nav-links { display: flex; gap: 0.25rem; flex: 1; }
+
+.nav-link {
+  color: var(--text2);
+  text-decoration: none;
+  padding: 0.3rem 0.85rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: all 0.15s;
+}
+.nav-link:hover {
+  color: var(--text);
+  background: var(--surface2);
+}
+.nav-link.active {
+  color: var(--primary);
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.nav-right { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+.nav-user {
+  font-size: 0.78rem;
+  color: var(--text2);
+  font-family: 'Space Mono', monospace;
+}
+
+/* contenedor principal con ancho maximo */
+.container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.page-header h2 {
+  font-size: 1.6rem;
+  color: var(--text);
+  position: relative;
+}
+
+/* subrayado de acento naranja bajo el titulo */
+.page-header h2::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 40px;
+  background: var(--primary);
+  margin-top: 6px;
+  border-radius: 2px;
+}
+
+/* botones con estilo retro flat */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text2);
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-warn { background: var(--warn); color: #111; }
+.btn-warn:hover { filter: brightness(0.9); }
+.btn-danger { background: var(--error); color: #fff; }
+.btn-danger:hover { filter: brightness(0.85); }
+.btn-full { width: 100%; text-align: center; padding: 0.85rem; font-size: 0.9rem; }
+.btn-sm { padding: 0.3rem 0.75rem; font-size: 0.75rem; }
+.btn-xs { padding: 0.2rem 0.5rem; font-size: 0.7rem; }
+
+/* badges de estado con colores vibrantes */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.badge-ok { background: rgba(6, 214, 160, 0.15); color: var(--ok); border: 1px solid rgba(6,214,160,0.3); }
+.badge-off { background: rgba(255, 77, 109, 0.15); color: var(--error); border: 1px solid rgba(255,77,109,0.3); }
+.badge-error { background: rgba(255, 77, 109, 0.15); color: var(--error); border: 1px solid rgba(255,77,109,0.3); }
+.badge-warn { background: rgba(255, 210, 63, 0.15); color: var(--warn); border: 1px solid rgba(255,210,63,0.3); }
+.badge-admin { background: rgba(199, 125, 255, 0.15); color: var(--admin); border: 1px solid rgba(199,125,255,0.3); }
+.badge-user { background: rgba(76, 201, 240, 0.15); color: var(--cool); border: 1px solid rgba(76,201,240,0.3); }
+
+/* alertas con borde izquierdo grueso */
+.alert {
+  padding: 0.9rem 1.2rem;
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.alert-error {
+  background: rgba(255, 77, 109, 0.1);
+  color: var(--error);
+  border-left: 3px solid var(--error);
+}
+.alert-warn {
+  background: rgba(255, 210, 63, 0.1);
+  color: var(--warn);
+  border-left: 3px solid var(--warn);
+}
+
+/* pagina de login centrada verticalmente */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+  /* patron de puntos de fondo */
+  background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.login-container {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255,107,53,0.1);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.login-logo { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+.login-title {
+  font-size: 1.75rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  font-family: 'Space Mono', monospace;
+}
+
+/* subrayado naranja bajo el titulo del login */
+.login-title::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 30px;
+  background: var(--primary);
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
+
+.login-subtitle { color: var(--text2); font-size: 0.875rem; margin-bottom: 1.75rem; margin-top: 0.5rem; }
+.login-hint { margin-top: 1.5rem; font-size: 0.75rem; color: var(--text2); font-family: 'Space Mono', monospace; }
+
+/* formularios oscuros */
+.form-group { text-align: left; margin-bottom: 1rem; }
+.form-group label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+input[type="text"], input[type="password"], input[type="number"], select {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  background: var(--bg2);
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255,107,53,0.15);
+  background: var(--surface);
+}
+
+select option { background: var(--surface2); }
+
+.search-input {
+  padding: 0.55rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 25px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.875rem;
+  background: var(--surface);
+  width: 260px;
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+.search-input:focus { outline: none; border-color: var(--primary); }
+.search-input::placeholder { color: var(--text2); }
+
+.input-sm { width: 80px; }
+.input-md { width: 160px; }
+
+.form-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+/* grid de tarjetas del catalogo */
+.grid-libros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+/* tarjeta de libro con hover que sube y cambia borde */
+.libro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.libro-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(255,107,53,0.15);
+}
+
+.libro-emoji { font-size: 2rem; flex-shrink: 0; }
+.libro-info { flex: 1; min-width: 0; }
+.libro-titulo {
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+.libro-autor { font-size: 0.8rem; color: var(--text2); margin-top: 0.15rem; }
+.libro-genero {
+  font-size: 0.7rem;
+  color: var(--primary);
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.libro-actions { display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end; flex-shrink: 0; }
+
+/* modal con fondo semitransparente oscuro */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,107,53,0.2);
+}
+.modal-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: var(--text2);
+  padding: 0.2rem 0.5rem;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--error); border-color: var(--error); }
+
+.detalle-libro { text-align: center; }
+.detalle-emoji { font-size: 3.5rem; margin-bottom: 0.75rem; }
+.detalle-libro h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+.detalle-libro p {
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text2);
+}
+.detalle-libro p strong { color: var(--text); }
+
+/* tarjetas de prestamos */
+.prestamo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.15s;
+}
+/* borde rojo a la izquierda para prestamos vencidos */
+.prestamo-vencido {
+  border-left: 3px solid var(--error);
+  background: rgba(255,77,109,0.05);
+}
+.prestamo-devuelto { opacity: 0.5; }
+.prestamo-info { display: flex; flex-direction: column; gap: 0.25rem; }
+.prestamo-info strong { font-size: 0.95rem; color: var(--text); }
+.prestamo-info span { font-size: 0.78rem; color: var(--text2); }
+
+#prestamosActivos h3, #prestamosHistorial h3 {
+  font-size: 1rem;
+  margin: 1.75rem 0 0.75rem;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+/* secciones del panel de admin */
+.admin-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.admin-section h3 {
+  font-size: 0.8rem;
+  color: var(--primary);
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.config-row label { font-size: 0.82rem; color: var(--text2); }
+
+/* grid de tarjetas de estadisticas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: border-color 0.15s;
+}
+.stat-card:hover { border-color: var(--primary); }
+
+/* numero grande en las tarjetas de estadisticas */
+.stat-num {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-family: 'Space Mono', monospace;
+}
+.stat-card span:last-child {
+  font-size: 0.7rem;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* tablas oscuras con hover */
+.tabla-container { overflow-x: auto; }
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+.tabla th {
+  background: var(--bg2);
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text2);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+}
+.tabla td {
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.tabla tr:last-child td { border-bottom: none; }
+.tabla tr:hover td { background: var(--surface2); }
+
+/* clase hidden para ocultar elementos con js */
+.hidden { display: none !important; }
+
+/* mensaje cuando no hay contenido */
+.empty-msg {
+  color: var(--text2);
+  font-size: 0.875rem;
+  padding: 1.5rem 0;
+  font-family: 'Space Mono', monospace;
+}
+
+/* animacion suave al cargar las tarjetas */
+.libro-card, .prestamo-card, .stat-card {
+  animation: fadeUp 0.2s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

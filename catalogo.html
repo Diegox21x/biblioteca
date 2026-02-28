@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca - Catalogo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- navbar comun, el enlace de admin solo aparece si el usuario es admin -->
+  <nav class="navbar">
+    <span class="nav-logo">Biblioteca</span>
+    <div class="nav-links">
+      <a href="catalogo.html" class="nav-link active">Catalogo</a>
+      <a href="misPrestamos.html" class="nav-link">Mis Prestamos</a>
+      <!-- este span empieza oculto, auth.js lo muestra si el usuario es admin -->
+      <span id="navAdmin" class="hidden"><a href="admin.html" class="nav-link">Admin</a></span>
+    </div>
+    <div class="nav-right">
+      <!-- el nombre del usuario lo añade auth.js -->
+      <span id="navUser" class="nav-user"></span>
+      <button class="btn btn-outline btn-sm" id="btnLogout">Salir</button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <h2>Catalogo de libros</h2>
+      <!-- buscador que filtra en tiempo real por titulo o autor -->
+      <input type="text" id="buscador" class="search-input" placeholder="Buscar por titulo o autor...">
+    </div>
+
+    <!-- alerta que aparece si el usuario tiene una penalizacion activa -->
+    <div id="alertPenalizado" class="alert alert-error hidden">
+      Tienes una penalizacion activa. No puedes solicitar prestamos.
+    </div>
+
+    <!-- alerta que aparece si ya llego al maximo de prestamos permitidos -->
+    <div id="alertMaxLibros" class="alert alert-warn hidden">
+      Ya tienes el maximo de prestamos activos permitidos.
+    </div>
+
+    <!-- aqui pinta catalogo.js las tarjetas de los libros -->
+    <div id="listaLibros" class="grid-libros"></div>
+  </main>
+
+  <!-- modal para ver el detalle de un libro, empieza oculto -->
+  <div id="modalLibro" class="modal hidden">
+    <div class="modal-box">
+      <!-- boton para cerrar el modal -->
+      <button class="modal-close" id="cerrarModal">x</button>
+      <!-- el contenido del detalle lo mete catalogo.js -->
+      <div id="modalContenido"></div>
+    </div>
+  </div>
+
+  <!-- primero datos, luego auth para proteger la pagina, luego la logica del catalogo -->
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/catalogo.js"></script>
+</body>
+</html>
