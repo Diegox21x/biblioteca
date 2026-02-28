@@ -52,6 +52,11 @@ body::before {
   z-index: 999;
 }
 
+#navAdmin {
+  display: flex;
+  align-items: center;
+}
+
 /* navbar oscura con borde inferior de acento */
 .navbar {
   background: var(--fondo2);
@@ -69,7 +74,7 @@ body::before {
 
 .nav-logo {
   font-family: 'Space Mono', monospace;
-  font-size: 16px;
+  font-size: 33px;
   font-weight: 700;
   color: var(--colorprimario);
   letter-spacing: 0.05em;
